@@ -30,7 +30,6 @@ namespace WhitehamBooks
             this.Text = $"Books Carl Wainwright {DateTime.Now.ToLongDateString()}";
             ShowRecord();
         }
-
         private void ShowRecord()
         { //Method to show data according to list number called 
             if (listOfBooks.Count > 0)
@@ -56,6 +55,45 @@ namespace WhitehamBooks
                 }
                 chkAvailable.Checked = false;
                 txtRecordCount.Text = "No Records";
+            }
+        }
+        private bool isbnCheck()
+        {
+            if (txtISBN.TextLength < 10)
+            {
+                MessageBox.Show("ISBN Must be 10 characters", "ISBN Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return false;
+            }
+            if (mod11ISBN(txtISBN.Text))
+            {
+                MessageBox.Show("ISBN Number is not a valid modulus 11 number", "ISBN Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return false;
+            }
+            return true;
+        }
+        private bool mod11ISBN(string number)
+        {
+            int multiplier = 10;
+            int calc = 0;
+            for (int i = 0; i < number.Length; i++)
+            {
+                if (number[i].Equals('x') || number[i].Equals('X'))
+                {
+                    calc += (10 * multiplier);
+                }
+                else
+                {
+                    calc += ((int)char.GetNumericValue(number[i]) * multiplier);
+                }
+                multiplier--;
+            }
+            if (calc % 11 == 0)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
             }
         }
         private bool invalidFields()
@@ -138,66 +176,70 @@ namespace WhitehamBooks
         }
         private void btnUpdate_Click(object sender, EventArgs e)
         {
-            bool exists = false;
-            for (int i = 0; i < listOfBooks.Count; i++)
-            {   //loop list of cars to see if ISBN exists
-                if (listOfBooks[i].IsbnNo.Equals(txtISBN.Text))
-                {
-                    exists = true;
-                    i = listOfBooks.Count;
+            if (isbnCheck())
+            {
+                bool exists = false;
+                for (int i = 0; i < listOfBooks.Count; i++)
+                {   //loop list of cars to see if ISBN exists
+                    if (listOfBooks[i].IsbnNo.Equals(txtISBN.Text))
+                    {
+                        exists = true;
+                        i = listOfBooks.Count;
+                    }
                 }
-            }
-            if (exists == true)
-            {   //allow update if isbn exists
-                if (invalidFields() == false)
-                {       //update sql table and show confiration message
-                    DataAccess.UpdateBook(txtISBN.Text, txtTitle.Text, txtAuthor.Text,txtPublisher.Text, DateTime.ParseExact(txtDatePublished.Text, "dd/MM/yyyy", CultureInfo.InvariantCulture), chkAvailable.Checked, Convert.ToDouble(txtPrice.Text));
-                    MessageBox.Show("Your update has been processed", "Book List Updated", MessageBoxButtons.OK);
-                    listOfBooks = DataAccess.getAllBooks();
+                if (exists == true)
+                {   //allow update if isbn exists
+                    if (invalidFields() == false)
+                    {       //update sql table and show confiration message
+                        DataAccess.UpdateBook(txtISBN.Text, txtTitle.Text, txtAuthor.Text, txtPublisher.Text, DateTime.ParseExact(txtDatePublished.Text, "dd/MM/yyyy", CultureInfo.InvariantCulture), chkAvailable.Checked, Convert.ToDouble(txtPrice.Text));
+                        MessageBox.Show("Your update has been processed", "Book List Updated", MessageBoxButtons.OK);
+                        listOfBooks = DataAccess.getAllBooks();
+                    }
+                    else
+                    {   //advise invalid field data
+                        MessageBox.Show("One of your fields are invalid", "Invalid Field(s)", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
                 }
                 else
-                {   //advise invalid field data
-                    MessageBox.Show("One of your fields are invalid", "Invalid Field(s)", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                {   //message to advise ISBN doesnt exist
+                    MessageBox.Show("This ISBN does not exist, you may Add this book as a new record", "Invalid Entry", MessageBoxButtons.OK, MessageBoxIcon.Stop);
                 }
             }
-            else
-            {   //message to advise ISBN doesnt exist
-                MessageBox.Show("This ISBN does not exist, you may Add this book as a new record", "Invalid Entry", MessageBoxButtons.OK, MessageBoxIcon.Stop);
-            }
         }
-
         private void btnAdd_Click(object sender, EventArgs e)
         {
-            bool duplicate = false;
-            for (int i = 0; i < listOfBooks.Count - 1; i++)
-            {   //loop list to see if isbn exists
-                if (listOfBooks[i].IsbnNo.Equals(txtISBN.Text))
-                {
-                    duplicate = true;
-                    i = listOfBooks.Count;
+            if (isbnCheck())
+            {
+                bool duplicate = false;
+                for (int i = 0; i < listOfBooks.Count - 1; i++)
+                {   //loop list to see if isbn exists
+                    if (listOfBooks[i].IsbnNo.Equals(txtISBN.Text))
+                    {
+                        duplicate = true;
+                        i = listOfBooks.Count;
+                    }
                 }
-            }
-            if (duplicate == true)
-            {   //if exists then advise they can update
-                MessageBox.Show("This ISBN already exists on the database, you may update but not add as new", "Invalid Entry", MessageBoxButtons.OK, MessageBoxIcon.Stop);
-            }
-            else
-            {   //check txt fields
-                if (invalidFields() == false)
-                {   //Add book to table and update ist
-                    DataAccess.AddBook(txtISBN.Text, txtTitle.Text, txtAuthor.Text, txtPublisher.Text, DateTime.ParseExact(txtDatePublished.Text, "dd/MM/yyyy", CultureInfo.InvariantCulture), chkAvailable.Checked, Convert.ToDouble(txtPrice.Text));
-                    listOfBooks = DataAccess.getAllBooks();
-                    recordNumber = listOfBooks.Count - 1;
-                    MessageBox.Show("Your book has been added to the database", "New Book Added", MessageBoxButtons.OK);
-                    ShowRecord();
+                if (duplicate == true)
+                {   //if exists then advise they can update
+                    MessageBox.Show("This ISBN already exists on the database, you may update but not add as new", "Invalid Entry", MessageBoxButtons.OK, MessageBoxIcon.Stop);
                 }
                 else
-                {
-                    MessageBox.Show("One of your fields are invalid", "Invalid Field(s)", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                {   //check txt fields
+                    if (invalidFields() == false)
+                    {   //Add book to table and update ist
+                        DataAccess.AddBook(txtISBN.Text, txtTitle.Text, txtAuthor.Text, txtPublisher.Text, DateTime.ParseExact(txtDatePublished.Text, "dd/MM/yyyy", CultureInfo.InvariantCulture), chkAvailable.Checked, Convert.ToDouble(txtPrice.Text));
+                        listOfBooks = DataAccess.getAllBooks();
+                        recordNumber = listOfBooks.Count - 1;
+                        MessageBox.Show("Your book has been added to the database", "New Book Added", MessageBoxButtons.OK);
+                        ShowRecord();
+                    }
+                    else
+                    {
+                        MessageBox.Show("One of your fields are invalid", "Invalid Field(s)", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
                 }
             }
         }
-
         private void btnDelete_Click(object sender, EventArgs e)
         {
             bool exists = false;
@@ -224,18 +266,15 @@ namespace WhitehamBooks
                 MessageBox.Show("This ISBN Number does not exist, therefore it cannot be deleted.", "Invalid ISBN Number", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
             }
         }
-
         private void btnCancel_Click(object sender, EventArgs e)
         {
             ShowRecord();
         }
-
         private void btnCancelAll_Click(object sender, EventArgs e)
         {
             listOfBooks = originalList;
             ShowRecord();
         }
-
         private void btnPrint_Click(object sender, EventArgs e)
         {
             PrintDialog printDialog = new PrintDialog();
@@ -245,9 +284,7 @@ namespace WhitehamBooks
                 intPageCount++;
             }
         }
-
         private void btnClose_Click(object sender, EventArgs e) => Application.Exit();
-
         private void btnFirst_Click(object sender, EventArgs e)
         {   //goto record 0 on list
             recordNumber = 0;
