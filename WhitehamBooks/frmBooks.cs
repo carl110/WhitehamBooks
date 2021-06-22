@@ -14,7 +14,6 @@ namespace WhitehamBooks
 {
     public partial class frmBooks : Form
     {
-
         List<Book> listOfBooks = DataAccess.getAllBooks();
         static List<Book> originalList = DataAccess.getAllBooks();
         int recordNumber = 0;
@@ -64,7 +63,7 @@ namespace WhitehamBooks
                 MessageBox.Show("ISBN Must be 10 characters", "ISBN Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return false;
             }
-            if (mod11ISBN(txtISBN.Text))
+            if (!mod11ISBN(txtISBN.Text))
             {
                 MessageBox.Show("ISBN Number is not a valid modulus 11 number", "ISBN Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return false;
