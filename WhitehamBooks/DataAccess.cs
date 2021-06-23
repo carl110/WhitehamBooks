@@ -58,7 +58,7 @@ namespace WhitehamBooks
             {
                 OleDbConnection conn = createConnection();
                 OleDbDataAdapter da = new OleDbDataAdapter();
-                da.DeleteCommand = new OleDbCommand("DELETE FROM Book WHERE ISBN No ='" + isbn + "'", conn);
+                da.DeleteCommand = new OleDbCommand("DELETE FROM Book WHERE `ISBN No` ='" + isbn + "'", conn);
                 conn.Open();
                 da.DeleteCommand.ExecuteNonQuery();
                 conn.Close();
@@ -75,7 +75,7 @@ namespace WhitehamBooks
                 OleDbConnection conn = createConnection();
                 conn.Open();
                 OleDbCommand cmd = new OleDbCommand("UPDATE Book SET Title=@2, Author=@3, Publisher=@4, Date Published=@5, Available=@6, Price=@7" +
-                        " WHERE ISBN No=@1", conn);
+                        " WHERE `ISBN No`=@1", conn);
                 cmd.Parameters.Add(new OleDbParameter("@1", OleDbType.VarChar) { Value = isbn });
                 cmd.Parameters.Add(new OleDbParameter("@2", OleDbType.VarChar) { Value = title });
                 cmd.Parameters.Add(new OleDbParameter("@3", OleDbType.VarChar) { Value = author });

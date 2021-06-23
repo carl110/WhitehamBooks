@@ -7,6 +7,7 @@ using System.Drawing.Printing;
 using System.Globalization;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
@@ -317,6 +318,26 @@ namespace WhitehamBooks
         {   //goto last item in list
             recordNumber = listOfBooks.Count - 1;
             ShowRecord();
+        }
+
+        private void txtPrice_Leave(object sender, EventArgs e)
+        {
+            if (!int.TryParse((sender as TextBox).Text, out int result))
+            {   //remove all non numerical entries
+                (sender as TextBox).Text = Regex.Replace((sender as TextBox).Text, "[^0-9]", "");
+            }
+        }
+
+        private void txtPrice_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            if (!char.IsControl(e.KeyChar) && !char.IsDigit(e.KeyChar) && (e.KeyChar != '£') && (e.KeyChar != '.'))
+            {
+                e.Handled = true;
+            }
+            if ((e.KeyChar == '.') && ((sender as TextBox).Text.IndexOf('.') > -1))
+            {
+                e.Handled = true;
+            }
         }
     }
 }
